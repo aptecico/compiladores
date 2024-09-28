@@ -1,0 +1,118 @@
+.model small
+.stack 100h
+.data
+    menu db 10,13,"1. Suma",10,13,"2. Resta",10,13,"3. Multiplicacion",10,13,"4. Division",10,13,"5. Salir",10,13,"Seleccione una opcion: $"
+    msg_num1 db 10,13,"Ingrese el primer numero: $"
+    msg_num2 db 10,13,"Ingrese el segundo numero: $"
+    msg_result db 10,13,"El resultado es: $"
+    msg_div_error db 10,13,"Error: Division por cero$"
+    msg_invalid db 10,13,"Opcion invalida$"
+
+.code
+main proc
+    mov ax, @data
+    mov ds, ax
+    
+menu_loop:
+    ; Mostrar menú
+    mov ah, 9
+    lea dx, menu
+    int 21h
+    
+    ; Leer opción
+    mov ah, 1
+    int 21h
+    sub al, '0'
+    
+    ; Saltar según la opción
+    cmp al, 1
+    je suma
+    cmp al, 2
+    je resta
+    cmp al, 3
+    je multiplicacion
+    cmp al, 4
+    je division
+    cmp al, 5
+    je salir
+    
+    ; Opción inválida
+    mov ah, 9
+    lea dx, msg_invalid
+    int 21h
+    jmp menu_loop
+    
+suma:
+    call leer_numeros
+    add bl, cl
+    jmp mostrar_resultado
+    
+resta:
+    call leer_numeros
+    sub bl, cl
+    jmp mostrar_resultado
+    
+multiplicacion:
+    call leer_numeros
+    mov al, bl
+    imul cl
+    mov bl, al
+    jmp mostrar_resultado
+    
+division:
+    call leer_numeros
+    cmp cl, 0
+    je div_error
+    mov al, bl
+    cbw
+    idiv cl
+    mov bl, al
+    jmp mostrar_resultado
+    
+div_error:
+    mov ah, 9
+    lea dx, msg_div_error
+    int 21h
+    jmp menu_loop
+    
+mostrar_resultado:
+    mov ah, 9
+    lea dx, msg_result
+    int 21h
+    
+    mov dl, bl
+    add dl, '0'
+    mov ah, 2
+    int 21h
+    
+    jmp menu_loop
+    
+salir:
+    mov ah, 4ch
+    int 21h
+    
+main endp
+
+leer_numeros proc
+    ; Leer primer número
+    mov ah, 9
+    lea dx, msg_num1
+    int 21h
+    mov ah, 1
+    int 21h
+    sub al, '0'
+    mov bl, al
+    
+    ; Leer segundo número
+    mov ah, 9
+    lea dx, msg_num2
+    int 21h
+    mov ah, 1
+    int 21h
+    sub al, '0'
+    mov cl, al
+    
+    ret
+leer_numeros endp
+
+end main
