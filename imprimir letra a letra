@@ -1,0 +1,55 @@
+.model small
+.stack 100h
+.data
+    prompt db 'Ingrese una palabra: $'
+    buffer db 100 dup('$')  ; Buffer para almacenar la palabra ingresada
+    newline db 13, 10, '$'  ; Carácter de nueva línea
+
+.code
+main proc
+    mov ax, @data
+    mov ds, ax
+
+    ; Mostrar el prompt
+    mov ah, 9
+    lea dx, prompt
+    int 21h
+
+    ; Leer la palabra del usuario
+    mov ah, 0Ah
+    lea dx, buffer
+    mov buffer, 99  ; Máximo 99 caracteres
+    int 21h
+
+    ; Imprimir nueva línea
+    mov ah, 9
+    lea dx, newline
+    int 21h
+
+    ; Preparar para imprimir letras
+    mov si, offset buffer + 2  ; Empezar desde el primer carácter ingresado
+
+print_loop:
+    mov al, [si]  ; Cargar el carácter actual
+    cmp al, 13    ; Verificar si es el final de la cadena (Enter)
+    je end_program
+
+    ; Imprimir el carácter
+    mov ah, 2
+    mov dl, al
+    int 21h
+
+    ; Imprimir nueva línea
+    mov ah, 9
+    lea dx, newline
+    int 21h
+
+    inc si  ; Mover al siguiente carácter
+    jmp print_loop
+
+end_program:
+    ; Terminar el programa
+    mov ah, 4Ch
+    int 21h
+main endp
+end main
