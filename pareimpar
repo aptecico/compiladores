@@ -1,0 +1,79 @@
+; Programa que solicita un número y determina si es par o impar
+
+.model small
+.stack 100h
+.data
+    mensajeEntrada db 'Ingrese un numero entero positivo: $'
+    mensajePar db 'El numero es par.$'
+    mensajeImpar db 'El numero es impar.$'
+    nuevaLinea db 13, 10, '$'
+    numero dw ?
+
+.code
+main proc
+    mov ax, @data
+    mov ds, ax
+    
+    ; Mostrar mensaje de entrada
+    mov ah, 9
+    lea dx, mensajeEntrada
+    int 21h
+    
+    ; Leer número del usuario
+    call leerNumero
+    
+    ; Nueva línea
+    mov ah, 9
+    lea dx, nuevaLinea
+    int 21h
+    
+    ; Verificar si es par o impar
+    mov ax, numero
+    test ax, 1
+    jnz esImpar
+    
+    ; Si es par
+    mov ah, 9
+    lea dx, mensajePar
+    int 21h
+    jmp fin
+    
+esImpar:
+    ; Si es impar
+    mov ah, 9
+    lea dx, mensajeImpar
+    int 21h
+
+fin:
+    ; Terminar programa
+    mov ah, 4Ch
+    int 21h
+
+main endp
+
+leerNumero proc
+    xor bx, bx  ; Inicializar BX a 0 para almacenar el número
+leerDigito:
+    mov ah, 1
+    int 21h
+    
+    cmp al, 13  ; Comprobar si es Enter
+    je finLectura
+    
+    sub al, '0'  ; Convertir ASCII a número
+    
+    mov cl, al
+    mov ax, bx
+    mov dx, 10
+    mul dx       ; AX = AX * 10
+    add ax, cx   ; Añadir el nuevo dígito
+    mov bx, ax   ; Guardar el resultado en BX
+    
+    jmp leerDigito
+
+finLectura:
+    mov numero, bx  ; Guardar el número final
+    ret
+leerNumero endp
+
+end main
