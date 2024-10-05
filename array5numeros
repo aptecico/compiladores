@@ -1,0 +1,68 @@
+; Enunciado: Crear un programa que lea 5 números del usuario,
+; los almacene en un arreglo, y luego imprima solo los números
+; pares en orden inverso.
+
+.model small
+.stack 100h
+.data
+    arreglo db 5 dup(?)
+    mensaje db 'Ingrese un numero (0-9): $'
+    mensajePares db 'Numeros pares en orden inverso: $'
+    nuevaLinea db 13, 10, '$'
+
+.code
+main proc
+    mov ax, @data
+    mov ds, ax
+    
+    ; Leer 5 números del usuario
+    mov cx, 5
+    mov si, 0
+    leerNumeros:
+        mov ah, 9
+        lea dx, mensaje
+        int 21h
+        
+        mov ah, 1
+        int 21h
+        
+        sub al, '0'  ; Convertir ASCII a número
+        mov arreglo[si], al
+        inc si
+        
+        mov ah, 9
+        lea dx, nuevaLinea
+        int 21h
+        
+        loop leerNumeros
+    
+    ; Imprimir mensaje de números pares
+    mov ah, 9
+    lea dx, mensajePares
+    int 21h
+    
+    ; Imprimir números pares en orden inverso
+    mov cx, 5
+    mov si, 4
+    imprimirPares:
+        mov al, arreglo[si]
+        test al, 1
+        jnz noPar
+        
+        add al, '0'  ; Convertir número a ASCII
+        mov dl, al
+        mov ah, 2
+        int 21h
+        
+        mov dl, ' '
+        int 21h
+        
+    noPar:
+        dec si
+        loop imprimirPares
+    
+    ; Terminar programa
+    mov ah, 4Ch
+    int 21h
+main endp
+end main
